@@ -16,20 +16,22 @@ const passportLocalMongoose = require("passport-local-mongoose"); // passport-lo
  */
 const mongoose = require("mongoose"),
   { Schema } = mongoose,
-  Subscriber = require("./Subscriber"), // Lesson 23 - Subscriber 모델을 요청
+  Subscriber = require("./GameSubscriber"), // Lesson 23 - Subscriber 모델을 요청
   userSchema = Schema(
     // 사용자 스키마 생성
     {
+      gamename:{
+        type: String,
+        trim: true,
+      },
       name: {
         // name 속성에 이름(first)과 성(last) 추가
-        first: {
-          type: String,
-          trim: true,
-        },
-        last: {
-          type: String,
-          trim: true,
-        },
+        type: String,
+        trim: true,
+      },
+      age: {
+        type: String,
+        trim: true,
       },
       email: {
         type: String,
@@ -38,26 +40,19 @@ const mongoose = require("mongoose"),
         unique: true,
         trim: true,
       },
-      username: {
+      phoneNumber: {
         type: String,
-        required: true,
-        lowercase: true,
-        unique: true,
         trim: true,
       },
       password: {
         type: String,
         required: true,
         trim: true,
-      },
-      phoneNumber: {
-        type: String,
-        trim: true,
-      },
+      }, // 비밀번호 속성 추가
       courses: [{ type: mongoose.Schema.Types.ObjectId, ref: "Course" }], // 사용자와 강좌를 연결 시켜주기 위한 강좌 속성 추가
       subscribedAccount: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Subscriber", // subscribedAccount를 사용자와 구독자를 연결하기 위해 추가
+        ref: "GameSubscriber", // subscribedAccount를 사용자와 구독자를 연결하기 위해 추가
       },
       profileImg: {
         type: String,
@@ -69,16 +64,6 @@ const mongoose = require("mongoose"),
     }
   );
 
-/**
- * @TODO:
- * 
- * Listing 24.3 (p. 353)
- * passport-local-mongoose 플러그인을 사용자 스키마에 추가
- */
-// 이메일 주소를 사용자 이름으로 사용
-userSchema.plugin(passportLocalMongoose,{
-  usernameField : "email"
-});
 
 /**
  * Listing 18.2 (p. 260)
@@ -88,16 +73,7 @@ userSchema.virtual("fullName").get(function () {
   return `${this.name.first} ${this.name.last}`;
 }); // 사용자의 풀 네임을 얻기 위한 가상 속성 추가
 
-/**
- * 노트: 이 책을 쓰는 시점에 Mongoose 메소드는 더 이상 의존하지 않는 어휘 this를
- * 사용하기 때문에 화살표 함수를 사용할 수 없다.
- */
 
-// pre("save") 훅 설정
-/**
- * 노트: save에서의 pre 훅은 사용자가 저장될 때마다 실행된다. 다시 말하먼 Mongoose의 save
- * 메소드를 통해 생성 또는 업데이트 후에 실행된다.
- */
 userSchema.pre("save", function (next) {
   let user = this; // 콜백에서 함수 키워드 사용
 
@@ -123,8 +99,4 @@ userSchema.pre("save", function (next) {
   }
 });
 
-module.exports = mongoose.model("User", userSchema);
-
-/**
- * 노트: 이 책을 쓰는 시점에는 Mongoose 훅에서 화살표 함수는 작동하지 않는다.
- */
+module.exports = mongoose.model("Game", userSchema);
